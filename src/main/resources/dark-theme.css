@@ -1,0 +1,17 @@
+.table-view {
+    -fx-base: black;
+    -fx-control-inner-background: black;
+    -fx-text-fill: white;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #111;
+}
+
+.table-cell, .table-row-cell {
+    -fx-text-fill: white;
+}
+
+.label {
+    -fx-text-fill: white;
+}
