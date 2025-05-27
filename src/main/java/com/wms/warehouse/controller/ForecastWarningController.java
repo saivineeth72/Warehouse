@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/forecast")
@@ -27,22 +29,27 @@ public class ForecastWarningController {
     @GetMapping("/warnings")
     public List<ProductDemand> getWarnings() {
         List<Product> products = productRepository.findAll();
-        List<ProductDemand> warnings = new ArrayList<>();
+        Map<String, Integer> productStockMap = new HashMap<>();
 
+        // Group products by name and sum their quantities
         for (Product p : products) {
-            List<Integer> history = salesService.getMonthlySales(p.getName());
-            int forecast = predictNextMonthDemand(history);
-
-            if (forecast > p.getQuantity()) {
-                warnings.add(new ProductDemand(p.getId(), p.getName(), forecast, p.getQuantity()));
-            }
+            productStockMap.put(
+                p.getName(),
+                productStockMap.getOrDefault(p.getName(), 0) + p.getQuantity()
+            );
         }
 
-        return warnings;
+        List<ProductDemand> results = new ArrayList<>();
+
+        for (Map.Entry<String, Integer> entry : productStockMap.entrySet()) {
+            String productName = entry.getKey();
+            int totalQuantity = entry.getValue();
+            int forecast = salesService.predictNextMonthDemand(productName);
+
+            results.add(new ProductDemand(null, productName, forecast, totalQuantity));
+        }
+
+        return results;
     }
 
-    private int predictNextMonthDemand(List<Integer> monthlySales) {
-        if (monthlySales == null || monthlySales.isEmpty()) return 0;
-        return (int) monthlySales.stream().mapToInt(Integer::intValue).average().orElse(0);
-    }
 }

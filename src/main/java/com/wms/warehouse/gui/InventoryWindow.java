@@ -13,6 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.scene.paint.Color;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -109,27 +110,68 @@ public class InventoryWindow {
             return row;
         });
 
-        // === Search Bar ===
+        ComboBox<String> fieldSelector = new ComboBox<>();
+        fieldSelector.getItems().addAll("Name", "Brand", "Location");
+        fieldSelector.setValue("Name");
+
+        // Apply CSS style for better visibility
+        fieldSelector.setStyle("""
+            -fx-background-color: #222;
+            -fx-border-color: white;
+            -fx-text-fill: white;
+        """);
+
+        // Force white text in dropdown cells too
+        fieldSelector.setCellFactory(lv -> {
+            ListCell<String> cell = new ListCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(item);
+                    setTextFill(Color.WHITE);
+                    setStyle("-fx-background-color: #222;");
+                }
+            };
+            return cell;
+        });
+
+        // Also make the selected item (button cell) white
+        fieldSelector.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(item);
+                setTextFill(Color.WHITE);
+                setStyle("-fx-background-color: #222;");
+            }
+        });
+
         TextField searchField = new TextField();
         searchField.setPromptText("Search...");
         searchField.setStyle("-fx-background-color: #222; -fx-text-fill: white; -fx-border-color: white;");
         searchField.setPrefWidth(400);
 
-        HBox searchBox = new HBox(searchField);
+        HBox searchBox = new HBox(10, new Label("Search by:"), fieldSelector, searchField);
         searchBox.setAlignment(Pos.CENTER_LEFT);
         searchBox.setPadding(new Insets(15, 15, 10, 15));
-        searchBox.setSpacing(10);
 
         // === Filter and Load ===
         ObservableList<Product> masterList = FXCollections.observableArrayList();
         FilteredList<Product> filteredList = new FilteredList<>(masterList, p -> true);
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             String keyword = newVal.toLowerCase(Locale.ROOT);
-            filteredList.setPredicate(product ->
-                    product.getName().toLowerCase().contains(keyword) ||
-                            product.getBrand().toLowerCase().contains(keyword) ||
-                            product.getLocation().toLowerCase().contains(keyword)
-            );
+            String selectedField = fieldSelector.getValue();
+        
+            filteredList.setPredicate(product -> {
+                if (selectedField.equals("Name")) {
+                    return product.getName().toLowerCase().contains(keyword);
+                } else if (selectedField.equals("Brand")) {
+                    return product.getBrand().toLowerCase().contains(keyword);
+                } else if (selectedField.equals("Location")) {
+                    return product.getLocation().toLowerCase().contains(keyword);
+                }
+                return true;
+            });
         });
 
         try {

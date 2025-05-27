@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 
 public class ExcelToPostgresImporter {
 
-    private static final String EXCEL_PATH = "data/historical_warehouse_demand.xlsx";
+    private static final String EXCEL_PATH = "data/historical_warehouse.xlsx";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/wmsdb";
     private static final String DB_USER = "saivineethpinnoju";
     private static final String DB_PASS = "wmspass";

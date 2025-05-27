@@ -35,24 +35,36 @@ public class AdminDashboard extends Application {
     public void start(Stage stage) {
         // === Right side: Title + Animated Numbers ===
         Label title1 = new Label("Available space");
-        title1.setFont(Font.font("Arial", FontWeight.BOLD, 28));
+        title1.setFont(Font.font("courier", FontWeight.BOLD, 40));
         title1.setTextFill(Color.WHITE);
 
         remainingLabel = new Label("0000000000 sq.mts");
-        remainingLabel.setFont(Font.font("Consolas", FontWeight.BOLD, 40));
+        remainingLabel.setFont(Font.font("Consolas", FontWeight.BOLD, 50));
         remainingLabel.setTextFill(Color.WHITE);
 
         Label title2 = new Label("Quantity in storage");
-        title2.setFont(Font.font("Arial", FontWeight.BOLD, 28));
+        title2.setFont(Font.font("courier", FontWeight.BOLD, 40));
         title2.setTextFill(Color.WHITE);
 
         quantityLabel = new Label("0000000000 units");
-        quantityLabel.setFont(Font.font("Consolas", FontWeight.BOLD, 40));
+        quantityLabel.setFont(Font.font("Consolas", FontWeight.BOLD, 50));
         quantityLabel.setTextFill(Color.WHITE);
 
-        VBox rightContent = new VBox(40, title1, remainingLabel, title2, quantityLabel);
-        rightContent.setAlignment(Pos.CENTER_RIGHT);
-        rightContent.setPadding(new Insets(40));
+        // Create separate boxes for space and quantity
+        VBox spaceBox = new VBox(20, title1, remainingLabel);
+        spaceBox.setAlignment(Pos.CENTER_RIGHT);
+        spaceBox.setPadding(new Insets(50));
+        spaceBox.setStyle("-fx-background-color: black;");
+
+        VBox quantityBox = new VBox(20, title2, quantityLabel);
+        quantityBox.setAlignment(Pos.CENTER_RIGHT);
+        quantityBox.setPadding(new Insets(50));
+        quantityBox.setStyle("-fx-background-color: black;");
+
+        // Container for both stat boxes
+        VBox rightContent = new VBox(20);
+        rightContent.getChildren().addAll(spaceBox, quantityBox);
+        rightContent.setAlignment(Pos.CENTER);
         rightContent.setStyle("-fx-background-color: black;");
 
         // === Left menu: Labels as boxes ===

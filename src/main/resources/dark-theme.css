@@ -9,6 +9,7 @@
 }
 
 .table-cell, .table-row-cell {
+    -fx-background-color: #333;
     -fx-text-fill: white;
 }
 
