@@ -30,6 +30,7 @@ public class ForecastWarningController {
     public List<ProductDemand> getWarnings() {
         List<Product> products = productRepository.findAll();
         Map<String, Integer> productStockMap = new HashMap<>();
+        Map<String, Long> productIdMap = new HashMap<>(); // Track productId for each name
 
         // Group products by name and sum their quantities
         for (Product p : products) {
@@ -37,6 +38,7 @@ public class ForecastWarningController {
                 p.getName(),
                 productStockMap.getOrDefault(p.getName(), 0) + p.getQuantity()
             );
+            productIdMap.putIfAbsent(p.getName(), p.getId()); // Save first productId for each name
         }
 
         List<ProductDemand> results = new ArrayList<>();
@@ -46,7 +48,8 @@ public class ForecastWarningController {
             int totalQuantity = entry.getValue();
             int forecast = salesService.predictNextMonthDemand(productName);
 
-            results.add(new ProductDemand(null, productName, forecast, totalQuantity));
+            Long productId = productIdMap.get(productName);
+            results.add(new ProductDemand(productId, productName, forecast, totalQuantity));
         }
 
         return results;

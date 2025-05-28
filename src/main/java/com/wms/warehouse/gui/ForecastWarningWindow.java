@@ -70,7 +70,52 @@ public class ForecastWarningWindow extends Stage {
         forecastCol.setMinWidth(150);
         currentCol.setMinWidth(150);
         
-        table.getColumns().addAll(nameCol, forecastCol, currentCol);
+        TableColumn<ProductDemand, Void> orderCol = new TableColumn<>("Auto-Order");
+        orderCol.setCellFactory(tc -> new TableCell<>() {
+            private final Button orderBtn = new Button("Auto-Order");
+            {
+                orderBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;");
+                orderBtn.setOnAction(e -> {
+                    ProductDemand demand = getTableView().getItems().get(getIndex());
+                    int forecast = Integer.parseInt(demand.getForecastedDemand().replace(",", ""));
+                    int current = Integer.parseInt(demand.getCurrentQuantity().replace(",", ""));
+                    int shortfall = forecast - current;
+                    if (shortfall <= 0) return;
+                    // Call backend to create order
+                    new Thread(() -> {
+                        try {
+                            RestTemplate rest = new RestTemplate();
+                            String url = "http://localhost:8080/orders/auto?productId=" + demand.getProductId() + "&quantity=" + shortfall;
+                            String resp = rest.postForObject(url, null, String.class);
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Auto-order placed for '" + demand.getProductName() + "' (" + shortfall + ") units.", ButtonType.OK);
+                                alert.showAndWait();
+                            });
+                        } catch (Exception ex) {
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to place auto-order: " + ex.getMessage(), ButtonType.OK);
+                                alert.showAndWait();
+                            });
+                        }
+                    }).start();
+                });
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    ProductDemand demand = getTableView().getItems().get(getIndex());
+                    int forecast = Integer.parseInt(demand.getForecastedDemand().replace(",", ""));
+                    int current = Integer.parseInt(demand.getCurrentQuantity().replace(",", ""));
+                    setGraphic(forecast > current ? orderBtn : null);
+                }
+            }
+        });
+        orderCol.setMinWidth(120);
+        
+        table.getColumns().addAll(nameCol, forecastCol, currentCol, orderCol);
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search by product name...");
