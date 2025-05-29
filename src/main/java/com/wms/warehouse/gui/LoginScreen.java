@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.wms.warehouse.model.User;
+
 public class LoginScreen extends Application {
 
     private static final String LOGIN_URL = "http://localhost:8080/api/login";
@@ -237,12 +239,16 @@ public class LoginScreen extends Application {
                     User user = response.getBody();
                     if (user != null) {
                         Platform.runLater(() -> {
-                            if ("admin".equals(user.getRole())) {
-                                new AdminDashboard().start(new Stage());
-                            } else {
-                                new SupplierDashboard().start(new Stage());
+                            try {
+                                if ("admin".equals(user.getRole())) {
+                                    new AdminDashboard().start(new Stage());
+                                } else {
+                                    new SupplierDashboard(user.getUsername()).start(new Stage());
+                                }
+                                stage.close();
+                            } catch (Exception ex) {
+                                errorLabel.setText("Error launching dashboard");
                             }
-                            stage.close();
                         });
                     }
                 } catch (Exception ex) {

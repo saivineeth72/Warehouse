@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 
 public class ExcelToPostgresImporter {
 
-    private static final String EXCEL_PATH = "data/historical_warehouse.xlsx";
+    private static final String EXCEL_PATH = "data/historical_supplier_performance.xlsx";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/wmsdb";
     private static final String DB_USER = "saivineethpinnoju";
     private static final String DB_PASS = "wmspass";
@@ -19,68 +19,83 @@ public class ExcelToPostgresImporter {
         System.out.println("✅ Main method working");
         org.apache.poi.util.IOUtils.setByteArrayMaxOverride(300_000_000);
         try (
-
                 Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
                 FileInputStream fis = new FileInputStream(new File(EXCEL_PATH));
                 Workbook workbook = new XSSFWorkbook(fis)
         ) {
             Sheet sheet = workbook.getSheetAt(0);
             PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO product_demand_history (product_code, demand_date, quantity) VALUES (?, ?, ?)"
+                    "INSERT INTO supplier_performance_history (product_name, order_date, received_date, supplier, order_demand) VALUES (?, ?, ?, ?, ?)"
             );
 
-            SimpleDateFormat parser = new SimpleDateFormat("MM/dd/yy");
+            SimpleDateFormat parser = new SimpleDateFormat("MM/dd/yyyy");
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
-            
-                // --- Product Code ---
-                Cell productCodeCell = row.getCell(0);
-                String productCode;
-                if (productCodeCell == null) continue;
-                if (productCodeCell.getCellType() == CellType.STRING) {
-                    productCode = productCodeCell.getStringCellValue().trim();
-                } else if (productCodeCell.getCellType() == CellType.NUMERIC) {
-                    productCode = String.valueOf((long) productCodeCell.getNumericCellValue()).trim();
-                } else {
-                    System.out.println("Skipping row " + i + ": invalid product code format");
+
+                // --- Product Name ---
+                Cell productNameCell = row.getCell(0);
+                if (productNameCell == null || productNameCell.getCellType() != CellType.STRING) {
+                    System.out.println("Skipping row " + i + ": invalid product name");
                     continue;
                 }
-            
-                Cell dateCell = row.getCell(2);
-                Date sqlDate;
+                String productName = productNameCell.getStringCellValue().trim();
 
+                // --- Order Date ---
+                Cell orderDateCell = row.getCell(1);
+                Date orderDate;
                 try {
-                    if (dateCell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(dateCell)) {
-                        java.util.Date parsed = dateCell.getDateCellValue();
-                        sqlDate = new Date(parsed.getTime());
-                    } else if (dateCell.getCellType() == CellType.STRING) {
-                        String dateStr = dateCell.getStringCellValue().trim();
-                        java.util.Date parsed = parser.parse(dateStr);
-                        sqlDate = new Date(parsed.getTime());
+                    if (orderDateCell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(orderDateCell)) {
+                        orderDate = new Date(orderDateCell.getDateCellValue().getTime());
                     } else {
-                        throw new Exception("Invalid cell type");
+                        String dateStr = orderDateCell.getStringCellValue().trim();
+                        orderDate = new Date(parser.parse(dateStr).getTime());
                     }
                 } catch (Exception e) {
-                    System.out.println("Skipping row " + i + ": invalid date format");
+                    System.out.println("Skipping row " + i + ": invalid order date");
                     continue;
                 }
-            
-                // --- Demand ---
-                Cell demandCell = row.getCell(3);
+
+                // --- Received Date ---
+                Cell receivedDateCell = row.getCell(2);
+                Date receivedDate;
+                try {
+                    if (receivedDateCell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(receivedDateCell)) {
+                        receivedDate = new Date(receivedDateCell.getDateCellValue().getTime());
+                    } else {
+                        String dateStr = receivedDateCell.getStringCellValue().trim();
+                        receivedDate = new Date(parser.parse(dateStr).getTime());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Skipping row " + i + ": invalid received date");
+                    continue;
+                }
+
+                // --- Supplier ---
+                Cell supplierCell = row.getCell(3);
+                if (supplierCell == null || supplierCell.getCellType() != CellType.STRING) {
+                    System.out.println("Skipping row " + i + ": invalid supplier");
+                    continue;
+                }
+                String supplier = supplierCell.getStringCellValue().trim();
+
+                // --- Order Demand ---
+                Cell demandCell = row.getCell(4);
                 if (demandCell == null || demandCell.getCellType() != CellType.NUMERIC) {
-                    System.out.println("Skipping row " + i + ": invalid demand");
+                    System.out.println("Skipping row " + i + ": invalid order demand");
                     continue;
                 }
-                int demand = (int) demandCell.getNumericCellValue();
-            
+                int orderDemand = (int) demandCell.getNumericCellValue();
+
                 // --- Add to batch ---
-                stmt.setString(1, productCode);
-                stmt.setDate(2, sqlDate);
-                stmt.setInt(3, demand);
+                stmt.setString(1, productName);
+                stmt.setDate(2, orderDate);
+                stmt.setDate(3, receivedDate);
+                stmt.setString(4, supplier);
+                stmt.setInt(5, orderDemand);
                 stmt.addBatch();
-            
+
                 if (i % 500 == 0) {
                     stmt.executeBatch();
                 }
