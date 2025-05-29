@@ -74,13 +74,20 @@ public class AdminDashboard extends Application {
         Label inventoryMenu = createMenuLabel("Inventory");
         inventoryMenu.setOnMouseClicked(e -> new InventoryWindow().show());
 
-        Label addProductMenu = createMenuLabel("Add Product");
+        Label addProductMenu = createMenuLabel("Buy a Product");
         addProductMenu.setOnMouseClicked(e -> new AddProductForm().show());
+
+        Label salesMenu = createMenuLabel("Sell a product");
+        salesMenu.setOnMouseClicked(e -> new SalesWindow().show());
 
         Label warningMenu = createMenuLabel("Warnings");
         warningMenu.setOnMouseClicked(e -> new ForecastWarningWindow().show());
 
-        VBox leftMenu = new VBox(30, suppliersMenu, inventoryMenu, addProductMenu, warningMenu);
+        Label AnalyticsMenu = createMenuLabel("Analytics");
+        AnalyticsMenu.setOnMouseClicked(e -> new Analytics().show());
+
+
+        VBox leftMenu = new VBox(30, suppliersMenu, inventoryMenu, addProductMenu, salesMenu, warningMenu, AnalyticsMenu);
         leftMenu.setAlignment(Pos.CENTER_LEFT);
         leftMenu.setPadding(new Insets(40));
         leftMenu.setStyle("-fx-background-color: black;");
@@ -104,7 +111,7 @@ public class AdminDashboard extends Application {
         label.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         label.setTextFill(Color.WHITE);
         label.setAlignment(Pos.CENTER);
-        label.setMinSize(180, 50);
+        label.setMinSize(280, 70);
         label.setStyle("-fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 5;");
 
         label.addEventHandler(MouseEvent.MOUSE_ENTERED, e ->
