@@ -2,20 +2,25 @@ package com.wms.warehouse.controller;
 
 import com.wms.warehouse.model.Product;
 import com.wms.warehouse.repository.ProductRepository;
+import com.wms.warehouse.repository.SalesHistoryRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.wms.warehouse.model.SalesHistory;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/sales")
 public class SalesController {
 
     private final ProductRepository productRepo;
+    private final SalesHistoryRepository salesHistoryRepo;
 
-    public SalesController(ProductRepository productRepo) {
+    public SalesController(ProductRepository productRepo, SalesHistoryRepository salesHistoryRepo) {
         this.productRepo = productRepo;
+        this.salesHistoryRepo = salesHistoryRepo;
     }
 
     @GetMapping("/search")
@@ -96,6 +101,16 @@ public class SalesController {
         updatedProducts.forEach(productRepo::save);
         toDelete.forEach(productRepo::deleteById);
 
+        for (Map<String, Object> row : breakdown) {
+            SalesHistory history = new SalesHistory();
+            history.setProductName(productName);
+            history.setQuantitySold((Integer) row.get("quantity"));
+            history.setUnitPrice(((Number) row.get("unitValue")).doubleValue());
+            history.setTotalPrice(((Number) row.get("total")).doubleValue());
+            history.setSupplierName(row.get("supplier").toString());
+            salesHistoryRepo.save(history);
+        }
+
         return ResponseEntity.ok(breakdown);
     }
 
@@ -104,5 +119,10 @@ public class SalesController {
         List<Product> matches = productRepo.findByNameContainingIgnoreCase(productName);
         int total = matches.stream().mapToInt(Product::getQuantity).sum();
         return ResponseEntity.ok(Map.of("totalAvailable", total));
+    }
+
+    @GetMapping("/history")
+    public List<SalesHistory> getSalesHistory() {
+        return salesHistoryRepo.findAllByOrderBySaleDateDesc();
     }
 }

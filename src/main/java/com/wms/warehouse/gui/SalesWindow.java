@@ -3,6 +3,7 @@ package com.wms.warehouse.gui;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wms.warehouse.model.Product;
+import com.wms.warehouse.model.SalesHistory;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -18,8 +19,10 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SalesWindow extends Stage {
 
@@ -177,6 +180,7 @@ public class SalesWindow extends Stage {
         });
 
         supplierTable.getColumns().addAll(
+            createCol("Product", "product"),
             createCol("Supplier", "supplier"),
             createCol("Location", "location"),
             createCol("Quantity", "quantity"),
@@ -220,6 +224,8 @@ public class SalesWindow extends Stage {
             }
             handleSell(selected.getName(), qty);
         });
+
+        fetchSalesHistory();
     }
 
     private void fetchProducts(String query) {
@@ -256,6 +262,7 @@ public class SalesWindow extends Stage {
                     totalCostLabel.setText("Total Cost: $" + formatter.format(total));
                     fetchProducts(searchField.getText());
                     quantityField.clear();
+                    fetchSalesHistory();
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -305,5 +312,29 @@ public class SalesWindow extends Stage {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.show();
+    }
+
+    private void fetchSalesHistory() {
+        new Thread(() -> {
+            try {
+                RestTemplate rest = new RestTemplate();
+                SalesHistory[] sales = rest.getForObject("http://localhost:8080/sales/history", SalesHistory[].class);
+                Platform.runLater(() -> {
+                    // Convert SalesHistory[] to List<Map<String, Object>> if you want to reuse supplierTable
+                    List<Map<String, Object>> salesList = Arrays.stream(sales).map(sale -> Map.<String, Object>of(
+                        "product", sale.getProductName(),
+                        "supplier", sale.getSupplierName(),
+                        "location", "",
+                        "quantity", sale.getQuantitySold(),
+                        "unitValue", sale.getUnitPrice(),
+                        "total", sale.getTotalPrice()
+                    )).collect(Collectors.toList());
+                    supplierTable.setItems(FXCollections.observableArrayList(salesList));
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> showAlert("Failed to fetch sales history"));
+            }
+        }).start();
     }
 }

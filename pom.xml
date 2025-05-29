@@ -177,7 +177,7 @@
 				<artifactId>javafx-maven-plugin</artifactId>
 				<version>0.0.8</version>
 				<configuration>
-					<mainClass>com.wms.warehouse.gui.AdminDashboard</mainClass>
+					<mainClass>com.wms.warehouse.gui.LoginScreen</mainClass>
 					<jvmArgs>
 						--module-path /path/to/javafx-sdk-21/lib
 						--add-modules javafx.controls,javafx.fxml
