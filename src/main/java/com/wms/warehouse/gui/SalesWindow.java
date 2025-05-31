@@ -68,6 +68,14 @@ public class SalesWindow extends Stage {
         inputBar.setAlignment(Pos.CENTER_LEFT);
         inputBar.setPadding(new Insets(0, 0, 15, 0));
 
+        TableColumn<Product, Long> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-font-weight: bold; -fx-alignment: CENTER-LEFT;");
+
+        TableColumn<Product, String> brandCol = new TableColumn<>("Brand");
+        brandCol.setCellValueFactory(new PropertyValueFactory<>("brand"));
+        brandCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-font-weight: bold; -fx-alignment: CENTER-LEFT;");
+
         TableColumn<Product, String> nameCol = new TableColumn<>("Product");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         nameCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-font-weight: bold; -fx-alignment: CENTER-LEFT;");
@@ -104,7 +112,7 @@ public class SalesWindow extends Stage {
             return cell;
         });
 
-        productTable.getColumns().add(nameCol);
+        productTable.getColumns().addAll(idCol, nameCol, brandCol);
         productTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         productTable.setStyle("-fx-background-color: black; -fx-control-inner-background: black; -fx-table-cell-border-color: #333; -fx-table-header-border-color: #333; -fx-text-fill: white;");
         productTable.setRowFactory(tv -> {
@@ -222,7 +230,7 @@ public class SalesWindow extends Stage {
                 showAlert("Please enter a valid positive quantity.");
                 return;
             }
-            handleSell(selected.getName(), qty);
+            handleSell(selected.getId(), qty);
         });
 
         fetchSalesHistory();
@@ -243,18 +251,16 @@ public class SalesWindow extends Stage {
         }).start();
     }
 
-    private void handleSell(String productName, int quantity) {
+    private void handleSell(Long productId, int quantity) {
         new Thread(() -> {
             try {
                 RestTemplate rest = new RestTemplate();
-                String url = "http://localhost:8080/sales/purchase?productName=" +
-                        URLEncoder.encode(productName, StandardCharsets.UTF_8) +
-                        "&quantityRequested=" + quantity;
+                String url = "http://localhost:8080/sales/purchase?productId=" + productId + "&quantityRequested=" + quantity;
 
                 ObjectMapper mapper = new ObjectMapper();
                 String json = rest.postForObject(url, null, String.class);
-                List<Map<String, Object>> result = mapper.readValue(json, new TypeReference<>() {});
-                double total = result.stream().mapToDouble(row -> ((Number) row.get("total")).doubleValue()).sum();
+                Map<String, Object> result = mapper.readValue(json, new TypeReference<>() {});
+                double total = ((Number) result.get("total")).doubleValue();
 
                 Platform.runLater(() -> {
                     supplierTable.setItems(FXCollections.observableArrayList(result));
