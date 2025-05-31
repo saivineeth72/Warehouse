@@ -154,7 +154,7 @@ public class LoginScreen extends Application {
         """));
 
         // Register link
-        Label registerLink = new Label("Register as supplier");
+        Label registerLink = new Label("Register");
         registerLink.setFont(Font.font("Arial", 14));
         registerLink.setTextFill(Color.web("#2196F3"));
         registerLink.setStyle("""

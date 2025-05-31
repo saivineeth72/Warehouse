@@ -28,6 +28,8 @@ public class ForecastWarningController {
 
     @GetMapping("/warnings")
     public List<ProductDemand> getWarnings() {
+        // Current stock is from the product table
+        // Forecasted demand is now based on sales history (not demand history)
         List<Product> products = productRepository.findAll();
         Map<String, Integer> productStockMap = new HashMap<>();
         Map<String, Long> productIdMap = new HashMap<>(); // Track productId for each name
@@ -46,7 +48,7 @@ public class ForecastWarningController {
         for (Map.Entry<String, Integer> entry : productStockMap.entrySet()) {
             String productName = entry.getKey();
             int totalQuantity = entry.getValue();
-            int forecast = salesService.predictNextMonthDemand(productName);
+            int forecast = salesService.predictNextMonthDemand(productName); // Now uses sales history
 
             Long productId = productIdMap.get(productName);
             results.add(new ProductDemand(productId, productName, forecast, totalQuantity));

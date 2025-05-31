@@ -22,7 +22,7 @@ public class RegisterSupplierWindow extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Register as Supplier");
+        stage.setTitle("Register");
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);

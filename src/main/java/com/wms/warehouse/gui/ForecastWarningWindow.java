@@ -19,6 +19,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +62,8 @@ public class ForecastWarningWindow extends Stage {
             ".table-view .scroll-bar:vertical .thumb { -fx-background-color: #4d4d4d; }" +
             ".table-view .scroll-bar:vertical .track { -fx-background-color: #2d2d2d; }");
 
+        TableColumn<ProductDemand, String> idCol = createStyledColumn("Product ID", "productId");
+        idCol.setMinWidth(100);
         TableColumn<ProductDemand, String> nameCol = createStyledColumn("Product", "productName");
         TableColumn<ProductDemand, String> forecastCol = createStyledColumn("Forecasted Demand", "forecastedDemand");
         TableColumn<ProductDemand, String> currentCol = createStyledColumn("Current Stock", "currentQuantity");
@@ -115,7 +118,7 @@ public class ForecastWarningWindow extends Stage {
         });
         orderCol.setMinWidth(120);
         
-        table.getColumns().addAll(nameCol, forecastCol, currentCol, orderCol);
+        table.getColumns().addAll(idCol, nameCol, forecastCol, currentCol, orderCol);
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search by product name...");
