@@ -65,12 +65,13 @@ public class ForecastWarningWindow extends Stage {
         TableColumn<ProductDemand, String> idCol = createStyledColumn("Product ID", "productId");
         idCol.setMinWidth(100);
         TableColumn<ProductDemand, String> nameCol = createStyledColumn("Product", "productName");
+        TableColumn<ProductDemand, String> brandCol = createStyledColumn("Brand", "brand");
+        brandCol.setMinWidth(120);
+        TableColumn<ProductDemand, String> supplierCol = createStyledColumn("Supplier", "supplierName");
+        supplierCol.setMinWidth(150);
         TableColumn<ProductDemand, String> forecastCol = createStyledColumn("Forecasted Demand", "forecastedDemand");
-        TableColumn<ProductDemand, String> currentCol = createStyledColumn("Current Stock", "currentQuantity");
-        
-        // Fix column header heights and make them non-wrapping
-        nameCol.setMinWidth(150);
         forecastCol.setMinWidth(150);
+        TableColumn<ProductDemand, String> currentCol = createStyledColumn("Current Stock", "currentQuantity");
         currentCol.setMinWidth(150);
         
         TableColumn<ProductDemand, Void> orderCol = new TableColumn<>("Auto-Order");
@@ -118,7 +119,7 @@ public class ForecastWarningWindow extends Stage {
         });
         orderCol.setMinWidth(120);
         
-        table.getColumns().addAll(idCol, nameCol, forecastCol, currentCol, orderCol);
+        table.getColumns().addAll(idCol, nameCol, brandCol, supplierCol, forecastCol, currentCol, orderCol);
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search by product name...");

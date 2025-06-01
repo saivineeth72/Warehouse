@@ -16,4 +16,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p.quantity FROM Product p WHERE p.id = :productId")
     int getCurrentStock(@Param("productId") Long productId);
+
+    @Query("SELECT p FROM Product p WHERE p.name = :name AND p.brand = :brand AND p.supplier.name = :supplierName")
+    Product findByNameAndBrandAndSupplierName(@Param("name") String name, @Param("brand") String brand, @Param("supplierName") String supplierName);
 }

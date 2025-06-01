@@ -15,6 +15,9 @@ public class SalesHistory {
     private String supplierName;
     private LocalDateTime saleDate = LocalDateTime.now();
 
+    @Column(name = "brand")
+    private String brand;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -35,4 +38,7 @@ public class SalesHistory {
 
     public LocalDateTime getSaleDate() { return saleDate; }
     public void setSaleDate(LocalDateTime saleDate) { this.saleDate = saleDate; }
+
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
 }

@@ -52,6 +52,7 @@ public class SalesController {
         history.setUnitPrice(product.getValue().doubleValue());
         history.setTotalPrice(product.getValue().doubleValue() * quantityRequested);
         history.setSupplierName(product.getSupplier().getName());
+        history.setBrand(product.getBrand());
         salesHistoryRepo.save(history);
 
         return ResponseEntity.ok(Map.of(

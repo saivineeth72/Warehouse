@@ -22,4 +22,11 @@ public interface SalesHistoryRepository extends JpaRepository<SalesHistory, Long
            "GROUP BY FUNCTION('DATE_TRUNC', 'month', sh.saleDate) " +
            "ORDER BY month")
     List<Object[]> findMonthlySalesByProductAndSupplier(@Param("productName") String productName, @Param("supplierName") String supplierName);
+
+    @Query("SELECT FUNCTION('DATE_TRUNC', 'month', sh.saleDate) as month, SUM(sh.quantitySold) " +
+           "FROM SalesHistory sh " +
+           "WHERE sh.productName = :productName AND sh.brand = :brand AND sh.supplierName = :supplierName " +
+           "GROUP BY FUNCTION('DATE_TRUNC', 'month', sh.saleDate) " +
+           "ORDER BY month")
+    List<Object[]> findMonthlySalesByProductBrandSupplier(@Param("productName") String productName, @Param("brand") String brand, @Param("supplierName") String supplierName);
 }

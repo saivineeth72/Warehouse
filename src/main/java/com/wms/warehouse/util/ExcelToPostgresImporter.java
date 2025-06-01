@@ -20,14 +20,14 @@ public class ExcelToPostgresImporter {
         org.apache.poi.util.IOUtils.setByteArrayMaxOverride(300_000_000);
 
         try (
-                Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-                FileInputStream fis = new FileInputStream(new File(EXCEL_PATH));
-                Workbook workbook = new XSSFWorkbook(fis)
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            FileInputStream fis = new FileInputStream(new File(EXCEL_PATH));
+            Workbook workbook = new XSSFWorkbook(fis)
         ) {
             Sheet sheet = workbook.getSheetAt(0);
             PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO sales_history (quantity_sold, unit_price, total_price, supplier_name, sale_date) " +
-                            "VALUES (?, ?, ?, ?, ?)"
+                "INSERT INTO sales_history (product_name, quantity_sold, unit_price, total_price, supplier_name, sale_date, brand) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
 
             SimpleDateFormat parser = new SimpleDateFormat("MM/dd/yyyy");
@@ -35,6 +35,14 @@ public class ExcelToPostgresImporter {
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
+
+                // --- Product Name ---
+                Cell productNameCell = row.getCell(0);
+                if (productNameCell == null || productNameCell.getCellType() != CellType.STRING) {
+                    System.out.println("Skipping row " + i + ": invalid product name");
+                    continue;
+                }
+                String productName = productNameCell.getStringCellValue().trim();
 
                 // --- Sale Date ---
                 Cell saleDateCell = row.getCell(1); // 'Date' column
@@ -67,6 +75,14 @@ public class ExcelToPostgresImporter {
                 }
                 int quantitySold = (int) quantityCell.getNumericCellValue();
 
+                // --- Brand ---
+                Cell brandCell = row.getCell(5);
+                if (brandCell == null || brandCell.getCellType() != CellType.STRING) {
+                    System.out.println("Skipping row " + i + ": invalid brand");
+                    continue;
+                }
+                String brand = brandCell.getStringCellValue().trim();
+
                 // --- Unit Price ---
                 Cell unitPriceCell = row.getCell(6);
                 if (unitPriceCell == null || unitPriceCell.getCellType() != CellType.NUMERIC) {
@@ -78,12 +94,14 @@ public class ExcelToPostgresImporter {
                 // --- Total Price ---
                 double totalPrice = quantitySold * unitPrice;
 
-                // Add to batch
-                stmt.setInt(1, quantitySold);
-                stmt.setInt(2, unitPrice);
-                stmt.setDouble(3, totalPrice);
-                stmt.setString(4, supplierName);
-                stmt.setDate(5, saleDate);
+                // --- Add to batch ---
+                stmt.setString(1, productName);
+                stmt.setInt(2, quantitySold);
+                stmt.setInt(3, unitPrice);
+                stmt.setDouble(4, totalPrice);
+                stmt.setString(5, supplierName);
+                stmt.setDate(6, saleDate);
+                stmt.setString(7, brand);
                 stmt.addBatch();
 
                 if (i % 500 == 0) {

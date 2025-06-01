@@ -28,32 +28,17 @@ public class ForecastWarningController {
 
     @GetMapping("/warnings")
     public List<ProductDemand> getWarnings() {
-        // Current stock is from the product table
-        // Forecasted demand is now based on sales history (not demand history)
+        // Group by name, brand, supplier
         List<Product> products = productRepository.findAll();
-        Map<String, Integer> productStockMap = new HashMap<>();
-        Map<String, Long> productIdMap = new HashMap<>(); // Track productId for each name
-
-        // Group products by name and sum their quantities
-        for (Product p : products) {
-            productStockMap.put(
-                p.getName(),
-                productStockMap.getOrDefault(p.getName(), 0) + p.getQuantity()
-            );
-            productIdMap.putIfAbsent(p.getName(), p.getId()); // Save first productId for each name
-        }
-
         List<ProductDemand> results = new ArrayList<>();
-
-        for (Map.Entry<String, Integer> entry : productStockMap.entrySet()) {
-            String productName = entry.getKey();
-            int totalQuantity = entry.getValue();
-            int forecast = salesService.predictNextMonthDemand(productName); // Now uses sales history
-
-            Long productId = productIdMap.get(productName);
-            results.add(new ProductDemand(productId, productName, forecast, totalQuantity));
+        for (Product p : products) {
+            String productName = p.getName();
+            String brand = p.getBrand();
+            String supplierName = p.getSupplier().getName();
+            int totalQuantity = p.getQuantity();
+            int forecast = salesService.predictNextMonthDemand(productName, brand, supplierName);
+            results.add(new ProductDemand(p.getId(), productName, brand, supplierName, forecast, totalQuantity));
         }
-
         return results;
     }
 
