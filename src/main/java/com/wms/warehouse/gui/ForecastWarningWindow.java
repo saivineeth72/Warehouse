@@ -292,15 +292,32 @@ public class ForecastWarningWindow extends Stage {
                     if (demand != null) {
                         int currentStock = Integer.parseInt(demand.getCurrentQuantity().replace(",", ""));
                         int forecast = Integer.parseInt(demand.getForecastedDemand().replace(",", ""));
+                        int reorderLevel = demand.getReorderLevel();
                         
-                        // If current stock is less than forecast, use red text
+                        // Create a HBox to hold text and warning
+                        HBox content = new HBox(5);
+                        Label textLabel = new Label(item.toString());
+                        content.getChildren().add(textLabel);
+                        
+                        // Style based on conditions
                         if (currentStock < forecast) {
-                            setStyle("-fx-text-fill: #ff4444; -fx-alignment: center; -fx-font-size: 14px;");
+                            textLabel.setStyle("-fx-text-fill: #ff4444;");
                         } else {
-                            setStyle("-fx-text-fill: white; -fx-alignment: center; -fx-font-size: 14px;");
+                            textLabel.setStyle("-fx-text-fill: white;");
                         }
+                        
+                        // Add reorder level warning if needed
+                        if (currentStock < reorderLevel) {
+                            Label warningLabel = new Label("⚠ Below Reorder Level");
+                            warningLabel.setStyle("-fx-text-fill: #ff4444; -fx-font-size: 12px;");
+                            content.getChildren().add(warningLabel);
+                        }
+                        
+                        setGraphic(content);
+                        setStyle("-fx-alignment: center; -fx-font-size: 14px; -fx-background-color: #1a1a1a;");
                     } else {
-                        setStyle("-fx-text-fill: white; -fx-alignment: center; -fx-font-size: 14px;");
+                        setGraphic(null);
+                        setStyle("-fx-text-fill: white; -fx-alignment: center; -fx-font-size: 14px; -fx-background-color: #1a1a1a;");
                     }
                 }
             }

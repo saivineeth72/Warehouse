@@ -26,8 +26,8 @@ public class ExcelToPostgresImporter {
         ) {
             Sheet sheet = workbook.getSheetAt(0);
             PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO sales_history (product_name, quantity_sold, unit_price, total_price, supplier_name, sale_date, brand) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO sales_history (product_name, quantity_sold, unit_price, total_price, supplier_name, sale_date, brand) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
 
             SimpleDateFormat parser = new SimpleDateFormat("MM/dd/yyyy");

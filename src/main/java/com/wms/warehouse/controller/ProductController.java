@@ -66,9 +66,9 @@ public class ProductController {
         }
 
         // Space validation
-        double remaining = warehouseRepo.findById(1L)
+        Long remaining = warehouseRepo.findById(1L)
                 .map(Warehouse::getRemainingCapacity)
-                .orElse(0.0);
+                .orElse(0L);
 
         if (product.getSizeSqm() * product.getQuantity() > remaining) {
             return ResponseEntity.badRequest().body("Not enough warehouse space to add this product. Remaining space: " + remaining);

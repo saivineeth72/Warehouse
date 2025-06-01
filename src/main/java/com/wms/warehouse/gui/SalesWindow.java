@@ -15,6 +15,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.springframework.web.client.RestTemplate;
+import javafx.util.Callback;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -70,53 +71,28 @@ public class SalesWindow extends Stage {
 
         TableColumn<Product, Long> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-font-weight: bold; -fx-alignment: CENTER-LEFT;");
+        idCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-alignment: CENTER-LEFT;");
 
         TableColumn<Product, String> brandCol = new TableColumn<>("Brand");
         brandCol.setCellValueFactory(new PropertyValueFactory<>("brand"));
-        brandCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-font-weight: bold; -fx-alignment: CENTER-LEFT;");
+        brandCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-alignment: CENTER-LEFT;");
 
-        TableColumn<Product, String> nameCol = new TableColumn<>("Product");
+        TableColumn<Product, String> nameCol = new TableColumn<>("Name");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-font-weight: bold; -fx-alignment: CENTER-LEFT;");
-        nameCol.setCellFactory(tc -> {
-            TableCell<Product, String> cell = new TableCell<>() {
-                @Override
-                protected void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setText(empty ? null : item);
-                    setAlignment(Pos.CENTER_LEFT);
-                    if (getTableRow() != null && getTableRow().isSelected()) {
-                        setStyle("-fx-text-fill: black; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: white; -fx-padding: 0 0 0 10;");
-                    } else {
-                        setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: black; -fx-padding: 0 0 0 10;");
-                    }
-                }
-            };
-            
-            // Update cell style when row selection changes
-            cell.tableRowProperty().addListener((obs, oldRow, newRow) -> {
-                if (newRow != null) {
-                    newRow.selectedProperty().addListener((obs2, wasSelected, isNowSelected) -> {
-                        if (cell.getItem() != null) {
-                            if (isNowSelected) {
-                                cell.setStyle("-fx-text-fill: black; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: white; -fx-padding: 0 0 0 10;");
-                            } else {
-                                cell.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: black; -fx-padding: 0 0 0 10;");
-                            }
-                        }
-                    });
-                }
-            });
-            
-            return cell;
-        });
+        nameCol.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-family: 'Tahoma'; -fx-alignment: CENTER-LEFT;");
 
         productTable.getColumns().addAll(idCol, nameCol, brandCol);
+        
+        // Apply the styled cell factory to each column
+        System.out.println("Applying cell factories to columns");
+        nameCol.setCellFactory(createStyledCellFactory());
+        brandCol.setCellFactory(createStyledCellFactory());
+
         productTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         productTable.setStyle("-fx-background-color: black; -fx-control-inner-background: black; -fx-table-cell-border-color: #333; -fx-table-header-border-color: #333; -fx-text-fill: white;");
         productTable.setRowFactory(tv -> {
             TableRow<Product> row = new TableRow<>();
+            row.setPrefHeight(40);
             row.setStyle("-fx-background-color: black; -fx-border-color: #333; -fx-border-width: 0 0 1 0;");
             
             // Style for hover state
@@ -169,7 +145,7 @@ public class SalesWindow extends Stage {
         rightPanel.setStyle("-fx-background-color: black;");
         rightPanel.setAlignment(Pos.CENTER);
 
-        Label breakdownLabel = new Label("🔍 Purchase Breakdown");
+        Label breakdownLabel = new Label("🔍 Purchase Breakdown\n");
         breakdownLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
 
         totalCostLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
@@ -178,6 +154,7 @@ public class SalesWindow extends Stage {
         supplierTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         supplierTable.setRowFactory(tv -> {
             TableRow<Map<String, Object>> row = new TableRow<>();
+            row.setPrefHeight(40);
             row.setStyle("-fx-background-color: black; -fx-border-color: #333; -fx-border-width: 0 0 1 0;");
             row.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
                 row.setStyle(isNowSelected ?
@@ -190,7 +167,6 @@ public class SalesWindow extends Stage {
         supplierTable.getColumns().addAll(
             createCol("Product", "product"),
             createCol("Supplier", "supplier"),
-            createCol("Location", "location"),
             createCol("Quantity", "quantity"),
             createCol("Unit Value", "unitValue"),
             createCol("Total", "total")
@@ -278,6 +254,7 @@ public class SalesWindow extends Stage {
     }
 
     private TableColumn<Map<String, Object>, String> createCol(String title, String key) {
+        System.out.println("Creating column: " + title + " with key: " + key);
         TableColumn<Map<String, Object>, String> col = new TableColumn<>(title);
         col.setCellValueFactory(data -> {
             Object value = data.getValue().get(key);
@@ -313,6 +290,41 @@ public class SalesWindow extends Stage {
         return col;
     }
 
+    private Callback<TableColumn<Product, String>, TableCell<Product, String>> createStyledCellFactory( ) {
+        System.out.println("Creating styled cell factory");
+        return tc -> {
+            TableCell<Product, String> cell = new TableCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty ? null : item);
+                    setAlignment(Pos.CENTER_LEFT);
+                    if (getTableRow() != null && getTableRow().isSelected()) {
+                        setStyle("-fx-text-fill: black; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: white; -fx-padding: 0 0 0 10;");
+                    } else {
+                        setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: black; -fx-padding: 0 0 0 10;");
+                    }
+                }
+            };
+    
+            cell.tableRowProperty().addListener((obs, oldRow, newRow) -> {
+                if (newRow != null) {
+                    newRow.selectedProperty().addListener((obs2, wasSelected, isNowSelected) -> {
+                        if (cell.getItem() != null) {
+                            if (isNowSelected) {
+                                cell.setStyle("-fx-text-fill: black; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: white; -fx-padding: 0 0 0 10;");
+                            } else {
+                                cell.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-family: 'Tahoma'; -fx-background-color: black; -fx-padding: 0 0 0 10;");
+                            }
+                        }
+                    });
+                }
+            });
+    
+            return cell;
+        };
+    }
+
     private void showAlert(String msg) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText(null);
@@ -330,7 +342,6 @@ public class SalesWindow extends Stage {
                     List<Map<String, Object>> salesList = Arrays.stream(sales).map(sale -> Map.<String, Object>of(
                         "product", sale.getProductName(),
                         "supplier", sale.getSupplierName(),
-                        "location", "",
                         "quantity", sale.getQuantitySold(),
                         "unitValue", sale.getUnitPrice(),
                         "total", sale.getTotalPrice()

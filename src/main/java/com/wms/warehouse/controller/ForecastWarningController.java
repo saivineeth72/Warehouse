@@ -37,7 +37,7 @@ public class ForecastWarningController {
             String supplierName = p.getSupplier().getName();
             int totalQuantity = p.getQuantity();
             int forecast = salesService.predictNextMonthDemand(productName, brand, supplierName);
-            results.add(new ProductDemand(p.getId(), productName, brand, supplierName, forecast, totalQuantity));
+            results.add(new ProductDemand(p.getId(), productName, brand, supplierName, forecast, totalQuantity, p.getReorderLevel()));
         }
         return results;
     }

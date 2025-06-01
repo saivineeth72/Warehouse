@@ -266,13 +266,13 @@ public class LoginScreen extends Application {
         new Thread(() -> {
             try {
                 RestTemplate rest = new RestTemplate();
-                Double capacity = rest.getForObject(REMAINING_CAPACITY_URL, Double.class);
+                Long capacity = rest.getForObject(REMAINING_CAPACITY_URL, Long.class);
                 Long quantity = rest.getForObject(TOTAL_QUANTITY_URL, Long.class);
 
                 if (capacity != null && quantity != null) {
                     Platform.runLater(() -> {
-                        animateLabel(remainingLabel, capacity.intValue(), "sq.mts");
-                        animateLabel(quantityLabel, quantity.intValue(), "units");
+                        animateLabel(remainingLabel, capacity, "sq.mts");
+                        animateLabel(quantityLabel, quantity, "units");
                     });
                 }
             } catch (Exception e) {
@@ -284,7 +284,7 @@ public class LoginScreen extends Application {
         }).start();
     }
 
-    private void animateLabel(Label label, int finalValue, String suffix) {
+    private void animateLabel(Label label, Long finalValue, String suffix) {
         Random rand = new Random();
         Timeline timeline = new Timeline();
 
@@ -292,7 +292,7 @@ public class LoginScreen extends Application {
             int frame = i;
             KeyFrame keyFrame = new KeyFrame(Duration.millis(FRAME_DELAY_MS * frame), event -> {
                 int fake = rand.nextInt((int) (finalValue * 1.5 + 1));
-                label.setText(formatNumber(fake) + " " + suffix);
+                label.setText(formatNumber((long) fake) + " " + suffix);
             });
             timeline.getKeyFrames().add(keyFrame);
         }
@@ -304,7 +304,7 @@ public class LoginScreen extends Application {
         timeline.play();
     }
 
-    private String formatNumber(int value) {
+    private String formatNumber(Long value) {
         return new DecimalFormat("000,000,000,000").format(value);
     }
 

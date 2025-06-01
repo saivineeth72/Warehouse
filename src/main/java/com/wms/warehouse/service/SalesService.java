@@ -11,8 +11,6 @@ import smile.regression.RandomForest;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 
 @Service
 public class SalesService {
@@ -44,6 +42,8 @@ public class SalesService {
             } else {
                 throw new RuntimeException("Unknown date type: " + monthObj.getClass());
             }
+            System.out.println("monthDate: " + monthDate);
+            System.out.println("sixMonthsAgo: " + sixMonthsAgo);
             if (!monthDate.isBefore(sixMonthsAgo)) {
                 Long total = (Long) row[1];
                 monthlySales.add(total != null ? total.intValue() : 0);
@@ -54,7 +54,7 @@ public class SalesService {
 
     public int predictNextMonthDemand(String productName) {
         List<Integer> history = getMonthlySales(productName);
-        System.out.println("Sales history for " + productName + ": " + history);
+        //System.out.println("Sales history for " + productName + ": " + history);
 
         if (history.size() == 0) return 0;
         if (history.size() < 4) {
