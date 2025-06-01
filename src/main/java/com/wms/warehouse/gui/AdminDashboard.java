@@ -30,6 +30,15 @@ public class AdminDashboard extends Application {
 
     private Label remainingLabel;
     private Label quantityLabel;
+    private String role;
+
+    public AdminDashboard() {
+        this.role = "admin"; // Default role
+    }
+
+    public AdminDashboard(String role) {
+        this.role = role;
+    }
 
     @Override
     public void start(Stage stage) {
@@ -68,29 +77,36 @@ public class AdminDashboard extends Application {
         rightContent.setStyle("-fx-background-color: black;");
 
         // === Left menu: Labels as boxes ===
-        Label suppliersMenu = createMenuLabel("Suppliers");
-        suppliersMenu.setOnMouseClicked(e -> new SupplierWindow().show());
-
-        Label inventoryMenu = createMenuLabel("Inventory");
-        inventoryMenu.setOnMouseClicked(e -> new InventoryWindow().show());
-
-        Label addProductMenu = createMenuLabel("Buy a Product");
-        addProductMenu.setOnMouseClicked(e -> new AddProductForm().show());
-
-        Label salesMenu = createMenuLabel("Sell a product");
-        salesMenu.setOnMouseClicked(e -> new SalesWindow().show());
-
-        Label warningMenu = createMenuLabel("Warnings");
-        warningMenu.setOnMouseClicked(e -> new ForecastWarningWindow().show());
-
-        Label AnalyticsMenu = createMenuLabel("Analytics");
-        AnalyticsMenu.setOnMouseClicked(e -> new Analytics().show());
-
-
-        VBox leftMenu = new VBox(30, suppliersMenu, inventoryMenu, addProductMenu, salesMenu, warningMenu, AnalyticsMenu);
+        VBox leftMenu = new VBox(30);
         leftMenu.setAlignment(Pos.CENTER_LEFT);
         leftMenu.setPadding(new Insets(40));
         leftMenu.setStyle("-fx-background-color: black;");
+
+        if (!"employee".equals(role)) {
+            Label suppliersMenu = createMenuLabel("Suppliers");
+            suppliersMenu.setOnMouseClicked(e -> new SupplierWindow().show());
+            leftMenu.getChildren().add(suppliersMenu);
+        }
+
+        Label inventoryMenu = createMenuLabel("Inventory");
+        inventoryMenu.setOnMouseClicked(e -> new InventoryWindow().show());
+        leftMenu.getChildren().add(inventoryMenu);
+
+        Label addProductMenu = createMenuLabel("Buy a Product");
+        addProductMenu.setOnMouseClicked(e -> new AddProductForm().show());
+        leftMenu.getChildren().add(addProductMenu);
+
+        Label salesMenu = createMenuLabel("Sell a product");
+        salesMenu.setOnMouseClicked(e -> new SalesWindow().show());
+        leftMenu.getChildren().add(salesMenu);
+
+        Label warningMenu = createMenuLabel("Warnings");
+        warningMenu.setOnMouseClicked(e -> new ForecastWarningWindow().show());
+        leftMenu.getChildren().add(warningMenu);
+
+        Label AnalyticsMenu = createMenuLabel("Analytics");
+        AnalyticsMenu.setOnMouseClicked(e -> new Analytics().show());
+        leftMenu.getChildren().add(AnalyticsMenu);
 
         // === Root Layout ===
         BorderPane root = new BorderPane();

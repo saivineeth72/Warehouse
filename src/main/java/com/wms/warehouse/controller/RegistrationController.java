@@ -43,6 +43,16 @@ public class RegistrationController {
         return "Supplier registered successfully";
     }
 
+    @PostMapping("/register-user")
+    public String registerUser(@RequestBody UserRegistrationDTO dto) {
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setPassword(encoder.encode(dto.getPassword()));
+        user.setRole(dto.getRole());
+        userRepo.save(user);
+        return "User registered successfully";
+    }
+
     // 🔽 Inline DTO class
     public static class SupplierRegistrationDTO {
         private String name;           // changed from companyName to match frontend
@@ -89,5 +99,17 @@ public class RegistrationController {
 
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
+    }
+
+    public static class UserRegistrationDTO {
+        private String username;
+        private String password;
+        private String role;
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
+        public String getRole() { return role; }
+        public void setRole(String role) { this.role = role; }
     }
 }

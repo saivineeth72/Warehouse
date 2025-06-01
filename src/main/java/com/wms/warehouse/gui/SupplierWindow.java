@@ -75,6 +75,12 @@ public class SupplierWindow {
         searchField.setPromptText("Search suppliers...");
         searchField.setPrefWidth(300);
 
+        Button addSupplierBtn = new Button("Add Supplier");
+        addSupplierBtn.setFont(new Font(14));
+        addSupplierBtn.setOnAction(e -> {
+            new AddSupplierWindow().show();
+        });
+
         ObservableList<Supplier> allSuppliers = FXCollections.observableArrayList();
         ObservableList<Supplier> filteredSuppliers = FXCollections.observableArrayList();
 
@@ -89,7 +95,8 @@ public class SupplierWindow {
             );
         });
 
-        VBox layout = new VBox(10, new HBox(10, searchField), table);
+        HBox topBar = new HBox(10, searchField, addSupplierBtn);
+        VBox layout = new VBox(10, topBar, table);
         layout.setPadding(new Insets(20));
 
         BorderPane root = new BorderPane(layout);

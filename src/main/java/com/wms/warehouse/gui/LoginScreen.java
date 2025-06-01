@@ -242,6 +242,8 @@ public class LoginScreen extends Application {
                             try {
                                 if ("admin".equals(user.getRole())) {
                                     new AdminDashboard().start(new Stage());
+                                } else if ("employee".equals(user.getRole())) {
+                                    new EmployeeDashboard().start(new Stage());
                                 } else {
                                     new SupplierDashboard(user.getUsername()).start(new Stage());
                                 }

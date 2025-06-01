@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class RegisterSupplierWindow extends Application {
 
-    private static final String REGISTER_URL = "http://localhost:8080/api/register-supplier";
+    private static final String REGISTER_URL = "http://localhost:8080/api/register-user";
 
     @Override
     public void start(Stage stage) {
@@ -31,24 +31,19 @@ public class RegisterSupplierWindow extends Application {
         grid.setPadding(new Insets(40));
         grid.setStyle("-fx-background-color: black;");
 
-        Label title = new Label("Supplier Registration");
+        Label title = new Label("User Registration");
         title.setTextFill(Color.WHITE);
         title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         grid.add(title, 0, 0, 2, 1);
-
-        TextField nameField = new TextField();
-        nameField.setPromptText("Company Name");
-        TextField contactField = new TextField();
-        contactField.setPromptText("Contact Address");
-        TextField emailField = new TextField();
-        emailField.setPromptText("Email Address");
-        TextField phoneField = new TextField();
-        phoneField.setPromptText("Phone Number");
 
         TextField usernameField = new TextField();
         usernameField.setPromptText("Username");
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
+
+        ComboBox<String> roleBox = new ComboBox<>();
+        roleBox.getItems().addAll("admin", "employee");
+        roleBox.setPromptText("Select Role");
 
         Label statusLabel = new Label();
         statusLabel.setTextFill(Color.RED);
@@ -56,20 +51,15 @@ public class RegisterSupplierWindow extends Application {
         Button registerButton = new Button("Register");
         registerButton.setFont(Font.font("Arial", FontWeight.NORMAL, 16));
         registerButton.setOnAction(e -> {
-            if (nameField.getText().isEmpty() || contactField.getText().isEmpty() ||
-                emailField.getText().isEmpty() || phoneField.getText().isEmpty() ||
-                usernameField.getText().isEmpty() || passwordField.getText().isEmpty()) {
+            if (usernameField.getText().isEmpty() || passwordField.getText().isEmpty() || roleBox.getValue() == null) {
                 statusLabel.setText("Please fill in all fields.");
                 return;
             }
 
             Map<String, String> data = new HashMap<>();
-            data.put("name", nameField.getText());
-            data.put("contactInfo", contactField.getText());
-            data.put("email", emailField.getText());
-            data.put("phone", phoneField.getText());
             data.put("username", usernameField.getText());
             data.put("password", passwordField.getText());
+            data.put("role", roleBox.getValue());
 
             new Thread(() -> {
                 try {
@@ -85,16 +75,13 @@ public class RegisterSupplierWindow extends Application {
             }).start();
         });
 
-        grid.add(new Label("Company Name:"), 0, 1); grid.add(nameField, 1, 1);
-        grid.add(new Label("Contact Info:"), 0, 2); grid.add(contactField, 1, 2);
-        grid.add(new Label("Email:"), 0, 3); grid.add(emailField, 1, 3);
-        grid.add(new Label("Phone:"), 0, 4); grid.add(phoneField, 1, 4);
-        grid.add(new Label("Username:"), 0, 5); grid.add(usernameField, 1, 5);
-        grid.add(new Label("Password:"), 0, 6); grid.add(passwordField, 1, 6);
-        grid.add(registerButton, 1, 7);
-        grid.add(statusLabel, 1, 8);
+        grid.add(new Label("Username:"), 0, 1); grid.add(usernameField, 1, 1);
+        grid.add(new Label("Password:"), 0, 2); grid.add(passwordField, 1, 2);
+        grid.add(new Label("Role:"), 0, 3); grid.add(roleBox, 1, 3);
+        grid.add(registerButton, 1, 4);
+        grid.add(statusLabel, 1, 5);
 
-        Scene scene = new Scene(grid, 600, 500);
+        Scene scene = new Scene(grid, 400, 350);
         stage.setScene(scene);
         stage.show();
     }

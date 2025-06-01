@@ -113,7 +113,15 @@ public class ForecastWarningWindow extends Stage {
                     ProductDemand demand = getTableView().getItems().get(getIndex());
                     int forecast = Integer.parseInt(demand.getForecastedDemand().replace(",", ""));
                     int current = Integer.parseInt(demand.getCurrentQuantity().replace(",", ""));
-                    setGraphic(forecast > current ? orderBtn : null);
+                    if (current > forecast * 1.2) {
+                        Label overstockedLabel = new Label("Overstocked");
+                        overstockedLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                        setGraphic(overstockedLabel);
+                    } else if (forecast > current) {
+                        setGraphic(orderBtn);
+                    } else {
+                        setGraphic(null);
+                    }
                 }
             }
         });

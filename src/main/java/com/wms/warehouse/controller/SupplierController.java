@@ -20,4 +20,9 @@ public class SupplierController {
     public List<Supplier> getAll() {
         return repo.findAll();
     }
+
+    @PostMapping
+    public Supplier addSupplier(@RequestBody Supplier supplier) {
+        return repo.save(supplier);
+    }
 }
