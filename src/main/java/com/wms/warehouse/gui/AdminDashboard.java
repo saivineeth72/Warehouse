@@ -41,7 +41,8 @@ public class AdminDashboard extends Application {
     }
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) {        
+
         // === Right side: Title + Animated Numbers ===
         Label title1 = new Label("Available space");
         title1.setFont(Font.font("courier", FontWeight.BOLD, 40));
@@ -108,6 +109,10 @@ public class AdminDashboard extends Application {
         AnalyticsMenu.setOnMouseClicked(e -> new Analytics().show());
         leftMenu.getChildren().add(AnalyticsMenu);
 
+        Label TransactionMenu = createMenuLabel("Transactions");
+        TransactionMenu.setOnMouseClicked(e -> new TransactionWindow().show());
+        leftMenu.getChildren().add(TransactionMenu);
+
         // === Root Layout ===
         BorderPane root = new BorderPane();
         root.setLeft(leftMenu);
@@ -141,13 +146,16 @@ public class AdminDashboard extends Application {
         new Thread(() -> {
             try {
                 RestTemplate restTemplate = new RestTemplate();
-                Double capacity = restTemplate.getForObject(REMAINING_CAPACITY_URL, Double.class);
+                Long capacity = restTemplate.getForObject(REMAINING_CAPACITY_URL, Long.class);
                 Long quantity = restTemplate.getForObject(TOTAL_QUANTITY_URL, Long.class);
+
+                System.out.println("Capacity: " + capacity);
+                System.out.println("Quantity: " + quantity);
 
                 if (capacity != null && quantity != null) {
                     Platform.runLater(() -> {
-                        animateLabel(remainingLabel, capacity.intValue(), "sq.mts");
-                        animateLabel(quantityLabel, quantity.intValue(), "units");
+                        animateLabel(remainingLabel, capacity, "sq.mts");
+                        animateLabel(quantityLabel, quantity, "units");
                     });
                 }
             } catch (Exception e) {
@@ -160,28 +168,28 @@ public class AdminDashboard extends Application {
         }).start();
     }
 
-    private void animateLabel(Label label, int finalValue, String suffix) {
+    private void animateLabel(Label label, long finalValue, String suffix) {
         Random rand = new Random();
         Timeline timeline = new Timeline();
-
+    
         for (int i = 0; i < ROLL_FRAMES; i++) {
             int frame = i;
             KeyFrame keyFrame = new KeyFrame(Duration.millis(FRAME_DELAY_MS * frame), event -> {
-                int fake = rand.nextInt((int) (finalValue * 1.5 + 1));
+                long fake = (long) (rand.nextDouble() * finalValue * 1.5); // Generates a safe fake long value
                 label.setText(formatNumber(fake) + " " + suffix);
             });
             timeline.getKeyFrames().add(keyFrame);
         }
-
+    
         KeyFrame finalFrame = new KeyFrame(Duration.millis(ROLL_FRAMES * FRAME_DELAY_MS), event ->
                 label.setText(formatNumber(finalValue) + " " + suffix));
         timeline.getKeyFrames().add(finalFrame);
-
+    
         timeline.play();
     }
 
-    private String formatNumber(int value) {
-        DecimalFormat df = new DecimalFormat("000,000,000");
+    private String formatNumber(long value) {
+        DecimalFormat df = new DecimalFormat("###,###,###,###");
         return df.format(value);
     }
 

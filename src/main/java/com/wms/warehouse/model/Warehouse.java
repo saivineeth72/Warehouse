@@ -11,10 +11,10 @@ public class Warehouse {
     private Long id;
 
     @Column(name = "total_capacity")
-    private double totalCapacity;
+    private Long totalCapacity;
 
     @Column(name = "remaining_capacity")
-    private double remainingCapacity;
+    private Long remainingCapacity;
 
     @Column(name = "total_quantity")
     private Long totalQuantity;
@@ -28,19 +28,19 @@ public class Warehouse {
         this.id = id;
     }
 
-    public double getTotalCapacity() {
+    public Long getTotalCapacity() {
         return totalCapacity;
     }
 
-    public void setTotalCapacity(double totalCapacity) {
+    public void setTotalCapacity(Long totalCapacity) {
         this.totalCapacity = totalCapacity;
     }
 
-    public double getRemainingCapacity() {
+    public Long getRemainingCapacity() {
         return remainingCapacity;
     }
 
-    public void setRemainingCapacity(double remainingCapacity) {
+    public void setRemainingCapacity(Long remainingCapacity) {
         this.remainingCapacity = remainingCapacity;
     }
 
@@ -48,7 +48,7 @@ public class Warehouse {
         return totalQuantity;
     }
 
-    public void setTotalQuantity(double totalQuantity) {
+    public void setTotalQuantity(Long totalQuantity) {
         this.totalCapacity = totalQuantity;
     }
 }

@@ -25,4 +25,28 @@ public class SupplierController {
     public Supplier addSupplier(@RequestBody Supplier supplier) {
         return repo.save(supplier);
     }
+
+    @PutMapping("/{id}")
+    public Supplier updateSupplier(@PathVariable Long id, @RequestBody Supplier updatedSupplier) {
+        return repo.findById(id)
+                .map(s -> {
+                    s.setName(updatedSupplier.getName());
+                    s.setEmail(updatedSupplier.getEmail());
+                    s.setPhone(updatedSupplier.getPhone());
+                    s.setContactInfo(updatedSupplier.getContactInfo());
+                    return repo.save(s);
+                })
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteSupplier(@PathVariable Long id) {
+        repo.deleteById(id);
+    }
+
+    @GetMapping("/{id}")
+    public Supplier getSupplierById(@PathVariable Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+    }
 }

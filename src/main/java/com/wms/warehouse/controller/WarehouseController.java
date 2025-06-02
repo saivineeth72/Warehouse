@@ -2,6 +2,9 @@ package com.wms.warehouse.controller;
 
 import com.wms.warehouse.model.Warehouse;
 import com.wms.warehouse.repository.WarehouseRepository;
+
+import java.math.BigInteger;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,10 +19,10 @@ public class WarehouseController {
 
     // Endpoint to get remaining capacity
     @GetMapping("/remaining-capacity")
-    public Double getRemainingCapacity() {
+    public Long getRemainingCapacity() {
         return warehouseRepository.findById(1L)
                 .map(Warehouse::getRemainingCapacity)
-                .orElse(0.0);
+                .orElse(0L);
     }
 
     // ✅ NEW: Endpoint to get total quantity in storage

@@ -1,4 +1,3 @@
-
 package com.wms.warehouse.gui;
 
 import javafx.application.Platform;
@@ -33,6 +32,12 @@ public class AddProductForm {
         grid.setPadding(new Insets(25));
         grid.setStyle("-fx-background-color: black;");
 
+        grid.getColumnConstraints().addAll(
+            new javafx.scene.layout.ColumnConstraints(),         // Label column
+            new javafx.scene.layout.ColumnConstraints(),         // Input column
+            createFixedColumn(180)                               // Error column
+        );
+
         Font font = Font.font("Arial", 14);
 
         TextField nameField = createTextField("Product Name", grid, 0, font);
@@ -43,6 +48,18 @@ public class AddProductForm {
         TextField sizeField = createTextField("Size (sqm)", grid, 5, font);
         TextField valueField = createTextField("Value ($)", grid, 6, font);
         TextField reorderField = createTextField("Reorder Level", grid, 7, font);
+
+        // === Error Labels ===
+        Label quantityError = createErrorLabel(grid, 2, 1);
+        Label reorderError = createErrorLabel(grid, 2, 7);
+        Label sizeError = createErrorLabel(grid, 2, 5);
+        Label valueError = createErrorLabel(grid, 2, 6);
+
+        // === Real-Time Validation ===
+        addIntegerValidation(quantityField, quantityError);
+        addIntegerValidation(reorderField, reorderError);
+        addDoubleValidation(sizeField, sizeError);
+        addDoubleValidation(valueField, valueError);
 
         Label supplierLabel = new Label("Supplier:");
         supplierLabel.setTextFill(Color.WHITE);
@@ -89,8 +106,6 @@ public class AddProductForm {
                 new Thread(() -> {
                     try {
                         RestTemplate restTemplate = new RestTemplate();
-                        System.out.println("➡️ Payload: " + product);
-                        System.out.println("➡️ Rest Template: " + restTemplate);
                         ResponseEntity<String> response = restTemplate.postForEntity(ADD_PRODUCT_URL, product, String.class);
                         Platform.runLater(() -> {
                             showAlert(Alert.AlertType.INFORMATION, "Product added successfully!");
@@ -108,9 +123,17 @@ public class AddProductForm {
         });
 
         grid.add(submit, 1, 10);
-        Scene scene = new Scene(grid, 500, 600);
+        Scene scene = new Scene(grid, 600, 600);
         stage.setScene(scene);
         stage.show();
+    }
+
+    private static javafx.scene.layout.ColumnConstraints createFixedColumn(double width) {
+        javafx.scene.layout.ColumnConstraints col = new javafx.scene.layout.ColumnConstraints();
+        col.setMinWidth(width);
+        col.setPrefWidth(width);
+        col.setMaxWidth(width);
+        return col;
     }
 
     private static TextField createTextField(String label, GridPane grid, int row, Font font) {
@@ -122,6 +145,34 @@ public class AddProductForm {
         grid.add(l, 0, row);
         grid.add(tf, 1, row);
         return tf;
+    }
+
+    private static Label createErrorLabel(GridPane grid, int col, int row) {
+        Label errorLabel = new Label(" "); // Use space to reserve layout
+        errorLabel.setTextFill(Color.RED);
+        errorLabel.setFont(Font.font("Arial", 12));
+        grid.add(errorLabel, col, row);
+        return errorLabel;
+    }
+
+    private static void addIntegerValidation(TextField field, Label errorLabel) {
+        field.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*")) {
+                errorLabel.setText("Enter only whole numbers");
+            } else {
+                errorLabel.setText("");
+            }
+        });
+    }
+
+    private static void addDoubleValidation(TextField field, Label errorLabel) {
+        field.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*(\\.\\d*)?")) {
+                errorLabel.setText("Enter a valid decimal number");
+            } else {
+                errorLabel.setText("");
+            }
+        });
     }
 
     private static void showAlert(Alert.AlertType type, String message) {

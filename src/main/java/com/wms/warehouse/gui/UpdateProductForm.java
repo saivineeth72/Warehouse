@@ -15,7 +15,6 @@ import javafx.scene.layout.HBox;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -39,8 +38,8 @@ public class UpdateProductForm {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25));
+        grid.setVgap(25);
+        grid.setPadding(new Insets(40));
         grid.setStyle("-fx-background-color: black;");
 
         Font font = Font.font("Arial", 16);
